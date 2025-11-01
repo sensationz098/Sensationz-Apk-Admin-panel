@@ -2,12 +2,11 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Header from "./components/Header";
 import { Providers } from "./Provider";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { AppSidebar } from "./components/app-sidebar";
+
 
 export const metadata: Metadata = {
-  title: "MyApp",
-  description: "Next.js 16 + Tailwind example",
+  title: "Course App Dashboard",
+  description: "Course App Dashboard",
 };
 
 export default function RootLayout({

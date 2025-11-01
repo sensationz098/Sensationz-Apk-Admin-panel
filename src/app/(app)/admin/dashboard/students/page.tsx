@@ -33,7 +33,7 @@ export default function StudentsPage() {
   const totalPages = Math.ceil(students.length / perPage);
 
   return (
-    <section className="w-full px-8 py-8">
+    <section className="w-full px-4 ">
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl font-semibold text-white tracking-tight">Students</h1>
         <Button className="bg-[#00BFFF] text-black font-medium hover:bg-[#1E90FF] transition">

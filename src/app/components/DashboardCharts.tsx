@@ -79,7 +79,7 @@ export default function DashboardCharts() {
               </Pie>
               <Tooltip
                 contentStyle={{
-                  backgroundColor: "#111",
+                  backgroundColor: "#0657ecff",
                   border: "1px solid #222",
                 }}
               />

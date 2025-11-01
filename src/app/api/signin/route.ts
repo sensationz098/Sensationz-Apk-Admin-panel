@@ -1,63 +1,29 @@
 import { NextRequest, NextResponse } from "next/server";
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
 import { prisma } from "@/lib/prisma";
-import { SignInSchema } from "@/schemas/signinSchema";
+import jwt from "jsonwebtoken";
 
-const JWT_SECRET = process.env.JWT_SECRET as string;
-if (!JWT_SECRET) throw new Error("Missing JWT_SECRET in environment");
+export const runtime = "nodejs";
 
 export async function POST(req: NextRequest) {
-  try {
-    const body = await req.json();
+  const { email, password } = await req.json();
 
-    const parsed = SignInSchema.safeParse(body);
-    if (!parsed.success) {
-      return NextResponse.json(
-        { error: parsed.error.issues[0].message },
-        { status: 400 }
-      );
-    }
+  if (!email || !password)
+    return NextResponse.json({ error: "Missing fields" }, { status: 400 });
 
-    const { email, password } = parsed.data;
+  const user = await prisma.user.findUnique({ where: { email } });
+  console.log("user in signin route",user)
+  if (!user || user.password !== password)
+    return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
 
-    const user = await prisma.user.findUnique({ where: { email } });
-    if (!user) {
-      return NextResponse.json(
-        { error: "Invalid credentials" },
-        { status: 401 }
-      );
-    }
+const token = jwt.sign(
+  { id: user.id, role: user.role, name: user.name },
+  process.env.JWT_SECRET!,
+  { expiresIn: "7d" }
+);
 
-   
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return NextResponse.json(
-        { error: "Password does not match" },
-        { status: 401 }
-      );
-    }
-
-    const token = jwt.sign(
-      { userId: user.id, email: user.email },
-      JWT_SECRET,
-      { expiresIn: "7d" }
-    );
-
-    const res = NextResponse.json({ message: "Login success" });
-    res.cookies.set("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      path: "/",
-      maxAge: 60 * 60 * 24 * 7, 
-    });
-
-    return res;
-  } catch (error) {
-    console.error("Signin error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
-  }
+  return NextResponse.json({
+    token,
+    role: user.role,
+    message: "Signed in successfully",
+  });
 }
