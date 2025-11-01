@@ -13,7 +13,8 @@ export function proxy(request: NextRequest) {
   if (!token) return NextResponse.next();
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { role: string ,name:string};
+    // const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { role: string ,name:string};
+        const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { role: string };
 
 
     if (url.pathname.startsWith("/admin/dashboard")) {

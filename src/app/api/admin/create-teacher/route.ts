@@ -8,7 +8,7 @@ import { CreateTeacherSchema } from "@/schemas/createTeacherSchema";
 
 export async function POST(req: NextRequest) {
 const token = req.cookies.get("token")?.value;
-  console.log("token in the create teacher route",token)
+  // console.log("token in the create teacher route",token)
   if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   try {

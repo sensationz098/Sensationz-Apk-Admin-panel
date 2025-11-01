@@ -1,46 +1,50 @@
+
+
+
 "use client";
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import jwt from "jsonwebtoken";
+import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
+
+type User = { name: string; role: "ADMIN" | "TEACHER" };
+
+async function fetchUser(): Promise<User> {
+  const res = await fetch("/api/me", { credentials: "include" });
+  if (!res.ok) throw new Error("Unauthorized");
+  return res.json();
+}
 
 export function AppSidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const [user, setUser] = useState<{ name: string; role: string } | null>(null);
+
+  const { data: user, isLoading, isError } = useQuery({
+    queryKey: ["me"],
+    queryFn: fetchUser,
+    staleTime: 1000 * 60 * 5, 
+    retry: false,
+  });
 
   useEffect(() => {
+    if (isError) router.push("/signin");
+  }, [isError, router]);
 
-   
-    const token = document.cookie
-      .split("; ")
-      .find((row) => row.startsWith("token="))
-      ?.split("=")[1];
-    if (!token) {
-      router.push("/signin");
-      return;
-    }
-
-
-
-
-    const decoded = jwt.decode(token) as { name: string; role: string } | null;
-    if (!decoded) {
-      router.push("/signin");
-      return;
-    }
-
-    setUser(decoded);
-  }, [router]);
+  if (isLoading)
+    return (
+      <nav className="h-full p-6 text-sm text-gray-400">
+        <p>Loading...</p>
+      </nav>
+    );
+  // console.log("user is -----appsidebar-",user)
 
   if (!user)
-  return (
-    <nav className="h-full p-6 text-sm text-gray-400">
-      <p>Loading...</p>
-    </nav>
-  );
-
+    return (
+      <nav className="h-full p-6 text-sm text-gray-400">
+        <p>Redirecting...</p>
+      </nav>
+    );
 
   const links =
     user.role === "ADMIN"
@@ -49,26 +53,20 @@ export function AppSidebar() {
           { href: "/admin/dashboard/courses", label: "Courses" },
           { href: "/admin/dashboard/students", label: "Students" },
           { href: "/admin/dashboard/teachers", label: "Teachers" },
-
           { href: "/admin/dashboard/activeBatches", label: "Active Batches" },
-
           { href: "/admin/dashboard/transactions", label: "Transactions" },
           { href: "/admin/dashboard/transactionCoupon", label: "Transaction Coupon" },
-        
         ]
       : [
           { href: "/teacher/dashboard", label: "Dashboard" },
           { href: "/teacher/dashboard/myCourses", label: "MyCourses" },
           { href: "/teacher/dashboard/enrolledStudents", label: "Enrolled Students" },
-
         ];
 
   return (
     <nav className="h-full p-6 text-sm text-gray-200">
       <div className="mb-8">
-        <div className="text-xl font-semibold text-white">
-          {user.role}
-        </div>
+        <div className="text-xl font-semibold text-white">{user.role}</div>
         <div className="text-xs text-gray-500 mt-1">{user.name}</div>
       </div>
 
@@ -91,5 +89,3 @@ export function AppSidebar() {
     </nav>
   );
 }
-
-

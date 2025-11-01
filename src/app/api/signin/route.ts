@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Missing fields" }, { status: 400 });
 
   const user = await prisma.user.findUnique({ where: { email } });
-  console.log("user in signin route",user)
+  // console.log("user in signin route",user)
   if (!user || user.password !== password)
     return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
 
